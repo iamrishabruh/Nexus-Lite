@@ -1,23 +1,26 @@
-import axios from 'axios';
+// src/api/healthdata.ts
+import apiClient from "./index";
 
-const API_URL = 'http://localhost:8000'; // Replace with your actual backend URL when deploying
+interface HealthDataPayload {
+  weight: number;
+  bp: string;
+  glucose: number;
+}
 
-export const submitHealthData = async (weight: number, bloodPressure: string, glucose: number) => {
-  try {
-    const response = await axios.post(`${API_URL}/healthdata`, { weight, bloodPressure, glucose });
-    return response.data;
-  } catch (error) {
-    console.error('Error submitting health data:', error);
-    throw error;
-  }
-};
+export async function logHealthData(token: string, payload: HealthDataPayload): Promise<any> {
+  const response = await apiClient.post("/healthdata/", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+}
 
-export const getHealthData = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/healthdata`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching health data:', error);
-    throw error;
-  }
-};
+export async function getHealthData(token: string): Promise<any[]> {
+  const response = await apiClient.get("/healthdata/", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+}

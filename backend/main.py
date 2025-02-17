@@ -1,23 +1,27 @@
+# backend/main.py
+
+import uvicorn
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import auth, healthdata, ai
+from .database import engine
+from .models import Base
+from .auth import router as auth_router
+from .healthdata import router as healthdata_router
+from .ai import router as ai_router
 
-app = FastAPI()
+def create_app() -> FastAPI:
+    app = FastAPI(title="Nexus-Lite API", version="1.0.0")
 
-# CORS middleware setup
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
+    # Create the database tables
+    Base.metadata.create_all(bind=engine)
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(healthdata.router)
-app.include_router(ai.router)
+    # Register routers
+    app.include_router(auth_router)
+    app.include_router(healthdata_router)
+    app.include_router(ai_router)
 
-@app.get("/")
-def read_root():
-    return {"message": "Nexus Lite Backend Running"}
+    return app
+
+app = create_app()
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

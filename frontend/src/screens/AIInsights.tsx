@@ -1,73 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+// src/screens/AIInsights.tsx
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, ScrollView, StyleSheet } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
 import { getAIInsights } from "../api/ai";
 
-const AIInsights = () => {
-  const [insights, setInsights] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+type Props = NativeStackScreenProps<RootStackParamList, "AIInsights">;
 
-  useEffect(() => {
-    fetchInsights();
-  }, []);
+export default function AIInsights({ route, navigation }: Props) {
+  const { token } = route.params;
+  const [insights, setInsights] = useState<string>("");
 
   const fetchInsights = async () => {
+    if (!token) return;
     try {
-      setLoading(true);
-      const data = await getAIInsights();
+      const data = await getAIInsights(token);
       setInsights(data.insights);
     } catch (error) {
-      console.error("Failed to fetch AI insights", error);
-      setError("Failed to load insights. Please try again later.");
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch AI insights:", error);
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.error}>{error}</Text>
-      </View>
-    );
-  }
+  useEffect(() => {
+    fetchInsights();
+  }, [token]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>AI Health Insights</Text>
-      <Text style={styles.insights}>{insights}</Text>
-    </ScrollView>
+      <ScrollView style={styles.insightContainer}>
+        <Text>{insights}</Text>
+      </ScrollView>
+      <Button title="Refresh Insights" onPress={fetchInsights} />
+      <Button title="Back to Dashboard" onPress={() => navigation.goBack()} />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  insights: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  error: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-  },
+  container: { flex: 1, padding: 16 },
+  title: { fontSize: 24, marginBottom: 16, textAlign: "center" },
+  insightContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    marginBottom: 8,
+    borderRadius: 4,
+    maxHeight: 300
+  }
 });
-
-export default AIInsights;

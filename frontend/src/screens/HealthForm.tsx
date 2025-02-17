@@ -1,51 +1,69 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { submitHealthData } from '../api/healthdata';
+// src/screens/HealthForm.tsx
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
+import { logHealthData } from "../api/healthdata";
 
-type RootStackParamList = {
-  Dashboard: undefined;
-  HealthForm: undefined;
-  AIInsights: undefined;
-};
+type Props = NativeStackScreenProps<RootStackParamList, "HealthForm">;
 
-type HealthFormProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'HealthForm'>;
-};
-
-const HealthForm: React.FC<HealthFormProps> = ({ navigation }) => {
-  const [weight, setWeight] = useState('');
-  const [bloodPressure, setBloodPressure] = useState('');
-  const [glucose, setGlucose] = useState('');
+export default function HealthForm({ route, navigation }: Props) {
+  const { token } = route.params;
+  const [weight, setWeight] = useState<string>("");
+  const [bp, setBp] = useState<string>("");
+  const [glucose, setGlucose] = useState<string>("");
 
   const handleSubmit = async () => {
+    if (!token) return;
     try {
-      await submitHealthData(parseFloat(weight), bloodPressure, parseFloat(glucose));
-      navigation.navigate('Dashboard');
-    } catch (error) {
-      console.error("Health data submission failed", error);
+      await logHealthData(token, {
+        weight: parseFloat(weight),
+        bp,
+        glucose: parseFloat(glucose)
+      });
+      Alert.alert("Success", "Health data recorded");
+      navigation.goBack();
+    } catch (error: any) {
+      Alert.alert("Error", error.response?.data?.detail || "Unknown error occurred");
     }
   };
 
   return (
-    <View>
-      <TextInput 
-        placeholder="Weight (kg)" 
+    <View style={styles.container}>
+      <Text style={styles.title}>Log Health Data</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Weight"
+        keyboardType="numeric"
+        value={weight}
         onChangeText={setWeight}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Blood Pressure (e.g., 120/80)"
+        value={bp}
+        onChangeText={setBp}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Glucose"
         keyboardType="numeric"
-      />
-      <TextInput 
-        placeholder="Blood Pressure (e.g., 120/80)" 
-        onChangeText={setBloodPressure}
-      />
-      <TextInput 
-        placeholder="Glucose (mg/dL)" 
+        value={glucose}
         onChangeText={setGlucose}
-        keyboardType="numeric"
       />
       <Button title="Submit" onPress={handleSubmit} />
     </View>
   );
-};
+}
 
-export default HealthForm;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 16 },
+  title: { fontSize: 24, marginBottom: 16, textAlign: "center" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 4
+  }
+});

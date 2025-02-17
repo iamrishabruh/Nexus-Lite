@@ -1,23 +1,22 @@
-import axios from 'axios';
+// src/api/auth.ts
+import apiClient from "./index";
 
-const API_URL = 'http://localhost:8000'; // Replace with your actual backend URL when deploying
+interface RegisterPayload {
+  email: string;
+  password: string;
+}
 
-export const loginUser = async (email: string, password: string) => {
-  try {
-    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
-  }
-};
+interface LoginPayload {
+  email: string;
+  password: string;
+}
 
-export const registerUser = async (email: string, password: string) => {
-  try {
-    const response = await axios.post(`${API_URL}/auth/register`, { email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Registration error:', error);
-    throw error;
-  }
-};
+export async function registerUser(payload: RegisterPayload): Promise<any> {
+  const response = await apiClient.post("/auth/register", payload);
+  return response.data;
+}
+
+export async function loginUser(payload: LoginPayload): Promise<{ access_token: string; token_type: string }> {
+  const response = await apiClient.post("/auth/login", payload);
+  return response.data;
+}
