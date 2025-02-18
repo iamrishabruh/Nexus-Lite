@@ -1,47 +1,37 @@
-import React, { useState } from 'react';
-import { View, Text } from 'react-native';
-import { Input, Button } from 'native-base';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from "react";
+import { View, Text, Button, StyleSheet } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 type RootStackParamList = {
   Login: undefined;
+  Register: undefined;
   Dashboard: undefined;
-  // Add other screens here
 };
 
-type LoginScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type DashboardProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, "Dashboard">;
 };
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    // Implement login logic here
-    console.log('Login attempted with:', email, password);
-    navigation.navigate('Dashboard');
-  };
-
+const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Login to Nexus</Text>
-      <Input 
-        placeholder="Email" 
-        value={email} 
-        onChangeText={setEmail} 
-        marginBottom={3}
-      />
-      <Input 
-        placeholder="Password" 
-        value={password} 
-        onChangeText={setPassword} 
-        type="password"
-        marginBottom={5}
-      />
-      <Button onPress={handleLogin}>Login</Button>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome to the Dashboard!</Text>
+      <Button title="Logout" onPress={() => navigation.replace("Login")} />
     </View>
   );
 };
 
-export default LoginScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+});
+
+export default Dashboard;
