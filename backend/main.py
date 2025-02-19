@@ -2,7 +2,7 @@
 
 import uvicorn
 from fastapi import FastAPI
-from .database import engine
+from .database import engine, get_db
 from .models import Base
 from .auth import router as auth_router
 from .healthdata import router as healthdata_router
@@ -13,7 +13,11 @@ def create_app() -> FastAPI:
 
     # Create the database tables
     Base.metadata.create_all(bind=engine)
-
+    # Dependency to get a db session
+    get_db()
+    @app.get("/connection")
+    def find_connection():
+        return {"message": "Database connected successfully!"}
     # Register routers
     app.include_router(auth_router)
     app.include_router(healthdata_router)
