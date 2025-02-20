@@ -8,8 +8,10 @@ frontend/web-build/
 
 # Python virtual environment (backend)
 backend/venv/
+backend/.venv/
 
 # Python caches (backend)
+backend/__pycache__/
 **/__pycache__/
 **/*.pyc
 
