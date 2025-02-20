@@ -1,115 +1,187 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { 
   View, 
   Text, 
-  TextInput, 
-  Pressable, 
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView, 
   StyleSheet, 
-  ActivityIndicator 
+  ActivityIndicator,
+  Platform
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { registerUser } from "../api/auth";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import Icon from "react-native-vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
+const RegisterSchema = Yup.object().shape({
+  firstName: Yup.string().required("First Name is required"),
+  lastName: Yup.string().required("Last Name is required"),
+  email: Yup.string().email("Invalid email address").required("Email is required"),
+  password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm Password is required"),
+});
+
 export default function RegisterScreen({ navigation }: Props) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+const [loading, setLoading] = useState(false);
+  // ADDED: States to toggle password visibility for both fields
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [secureTextEntryConfirm, setSecureTextEntryConfirm] = useState(true);
 
-  const handleCreateAccount = async () => {
-    setErrorMsg("");
+  // ADDED: Toggle functions for password visibility
+  const togglePasswordVisibility = useCallback(() => {
+    setSecureTextEntry(prev => !prev);
+  }, []);
 
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      setErrorMsg("All fields are required.");
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setErrorMsg("Passwords do not match.");
-      return;
-    }
+  const toggleConfirmPasswordVisibility = useCallback(() => {
+    setSecureTextEntryConfirm(prev => !prev);
+  }, []);
 
+  // ADDED: Advanced handler using Formik values and Yup errors
+  const handleRegister = async (
+    values: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string },
+    { setFieldError, resetForm }: any
+  ) => {
     setLoading(true);
     try {
-      await registerUser({ firstName, lastName, email, password });
+      await registerUser({ 
+        firstName: values.firstName, 
+        lastName: values.lastName, 
+        email: values.email, 
+        password: values.password 
+      });
+      resetForm();
       navigation.navigate("Login");
-    } catch (error: any) {
+      } catch (error: any) {
       console.error("Registration error:", error);
-      setErrorMsg(error.response?.data?.detail || "An unexpected error occurred.");
+      setFieldError("general", error.response?.data?.detail || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
+ return (
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Create Account</Text>
+        <Formik
+          initialValues={{ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" }}
+          validationSchema={RegisterSchema}
+          onSubmit={handleRegister}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              {/* Display any general error */}
+              {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
 
-      {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+              {/* First Name Field */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="First Name"
+                  placeholderTextColor="#888"
+                  autoCapitalize="words"
+                  style={styles.input}
+                  onChangeText={handleChange("firstName")}
+                  onBlur={handleBlur("firstName")}
+                  value={values.firstName}
+                />
+                {errors.firstName && touched.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
+              </View>
 
-      <TextInput
-        placeholder="First Name"
-        placeholderTextColor="#888"
-        value={firstName}
-        onChangeText={setFirstName}
-        autoCapitalize="words"
-        style={[styles.input, { color: "black" }]}
-      />
+              {/* Last Name Field */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Last Name"
+                  placeholderTextColor="#888"
+                  autoCapitalize="words"
+                  style={styles.input}
+                  onChangeText={handleChange("lastName")}
+                  onBlur={handleBlur("lastName")}
+                  value={values.lastName}
+                />
+                {errors.lastName && touched.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
+              </View>
 
-      <TextInput
-        placeholder="Last Name"
-        placeholderTextColor="#888"
-        value={lastName}
-        onChangeText={setLastName}
-        autoCapitalize="words"
-        style={[styles.input, { color: "black" }]}
-      />
+              {/* Email Field */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Email"
+                  placeholderTextColor="#888"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={styles.input}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  value={values.email}
+                />
+                {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
+              </View>
 
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={[styles.input, { color: "black" }]}
-      />
+              {/* Password Field with Visibility Toggle */}
+              <View style={styles.inputContainer}>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    placeholder="Password"
+                    placeholderTextColor="#888"
+                    secureTextEntry={secureTextEntry}
+                    autoCapitalize="none"
+                    style={[styles.input, { flex: 1 }]}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    value={values.password}
+                  />
+                  <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                    <Icon name={secureTextEntry ? "eye-off" : "eye"} size={24} color="#888" />
+                  </TouchableOpacity>
+                </View>
+                {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
+              </View>
 
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#888"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={[styles.input, { color: "black" }]}
-      />
+              {/* Confirm Password Field with Visibility Toggle */}
+              <View style={styles.inputContainer}>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    placeholder="Confirm Password"
+                    placeholderTextColor="#888"
+                    secureTextEntry={secureTextEntryConfirm}
+                    autoCapitalize="none"
+                    style={[styles.input, { flex: 1 }]}
+                    onChangeText={handleChange("confirmPassword")}
+                    onBlur={handleBlur("confirmPassword")}
+                    value={values.confirmPassword}
+                  />
+                  <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
+                    <Icon name={secureTextEntryConfirm ? "eye-off" : "eye"} size={24} color="#888" />
+                  </TouchableOpacity>
+                </View>
+                {errors.confirmPassword && touched.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              </View>
 
-      <TextInput
-        placeholder="Confirm Password"
-        placeholderTextColor="#888"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        style={[styles.input, { color: "black" }]}
-      />
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-      ) : null}
-
-      {/* "Create Account" Button at Bottom */}
-      <Pressable style={styles.button} onPress={handleCreateAccount}>
-        <Text style={styles.buttonText}>Create Account</Text>
-      </Pressable>
-    </View>
+              {/* Loading indicator or Create Account Button */}
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
+              ) : (
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                  <Text style={styles.buttonText}>Create Account</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </Formik>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { 
@@ -133,6 +205,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     padding: 12,
     borderRadius: 6,
+  },
+   inputContainer: {
+    width: "90%",
+    marginBottom: 12,
+  },
+    passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 6,
+    paddingRight: 12,
+  },
+    eyeIcon: {
+    padding: 10,
   },
   errorText: {
     color: "red",
