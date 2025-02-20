@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Pressable, 
+  StyleSheet, 
+  ActivityIndicator 
+} from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { registerUser } from "../api/auth";
@@ -7,29 +14,34 @@ import { registerUser } from "../api/auth";
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
 export default function RegisterScreen({ navigation }: Props) {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleRegister = async () => {
+  const handleCreateAccount = async () => {
     setErrorMsg("");
-    if (!email || !password) {
-      setErrorMsg("Please enter both email and password.");
+
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      setErrorMsg("All fields are required.");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match.");
       return;
     }
 
     setLoading(true);
     try {
-      await registerUser({ email, password });
-      // Optionally, show a success message
+      await registerUser({ firstName, lastName, email, password });
       navigation.navigate("Login");
     } catch (error: any) {
       console.error("Registration error:", error);
-      setErrorMsg(
-        error.response?.data?.detail ||
-        "An unexpected error occurred during registration."
-      );
+      setErrorMsg(error.response?.data?.detail || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -37,40 +49,90 @@ export default function RegisterScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+      <Text style={styles.title}>Create Account</Text>
+
       {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+
+      <TextInput
+        placeholder="First Name"
+        placeholderTextColor="#888"
+        value={firstName}
+        onChangeText={setFirstName}
+        autoCapitalize="words"
+        style={[styles.input, { color: "black" }]}
+      />
+
+      <TextInput
+        placeholder="Last Name"
+        placeholderTextColor="#888"
+        value={lastName}
+        onChangeText={setLastName}
+        autoCapitalize="words"
+        style={[styles.input, { color: "black" }]}
+      />
+
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={styles.input}
+        keyboardType="email-address"
+        style={[styles.input, { color: "black" }]}
       />
+
       <TextInput
         placeholder="Password"
+        placeholderTextColor="#888"
         value={password}
-        secureTextEntry
         onChangeText={setPassword}
-        style={styles.input}
+        secureTextEntry
+        style={[styles.input, { color: "black" }]}
       />
+
+      <TextInput
+        placeholder="Confirm Password"
+        placeholderTextColor="#888"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        style={[styles.input, { color: "black" }]}
+      />
+
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-      ) : (
-        <Button title="Register" onPress={handleRegister} />
-      )}
+      ) : null}
+
+      {/* "Create Account" Button at Bottom */}
+      <Pressable style={styles.button} onPress={handleCreateAccount}>
+        <Text style={styles.buttonText}>Create Account</Text>
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 16 },
-  title: { fontSize: 24, marginBottom: 16, textAlign: "center" },
+  container: { 
+    flex: 1, 
+    justifyContent: "center", // Centers everything vertically
+    alignItems: "center", // Centers everything horizontally
+    padding: 16, 
+    backgroundColor: "#fff",
+  },
+  title: { 
+    fontSize: 24, 
+    marginBottom: 16, 
+    textAlign: "center", 
+    fontWeight: "bold" 
+  },
   input: {
+    width: "90%", // Makes input fields responsive
     borderWidth: 1,
     borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
     marginBottom: 12,
-    padding: 8,
-    borderRadius: 4,
+    padding: 12,
+    borderRadius: 6,
   },
   errorText: {
     color: "red",
@@ -79,5 +141,18 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginVertical: 16,
+  },
+  button: {
+    width: "90%", // Makes button same width as inputs
+    backgroundColor: "#007BFF",
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 20, // Adds space above the button
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

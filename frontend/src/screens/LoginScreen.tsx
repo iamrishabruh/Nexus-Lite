@@ -1,42 +1,44 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  ActivityIndicator, 
+  StyleSheet 
+} from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { loginUser } from "../api/auth";
+import { Pressable } from "react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async () => {
-    // Clear previous error message
-    setErrorMsg("");
-    // Basic client-side validation
-    if (!email || !password) {
+    setErrorMsg(""); // Clear previous errors
+
+    if (!email.trim() || !password.trim()) {
       setErrorMsg("Please enter both email and password.");
       return;
     }
-    
+
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-      console.log("Login response:", data);
-      if (data && data.access_token) {
-        // Navigate to Dashboard with token
+
+      if (data?.access_token) {
         navigation.navigate("Dashboard", { token: data.access_token });
       } else {
-        setErrorMsg("Login failed: no token returned.");
+        setErrorMsg("Invalid login credentials.");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMsg(
-        error.response?.data?.detail ||
-        "An unexpected error occurred during login."
-      );
+      setErrorMsg(error.response?.data?.detail || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -45,52 +47,88 @@ export default function LoginScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+
+      {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#888" // Makes placeholder visible
         value={email}
         onChangeText={setEmail}
-        autoCapitalize="none"
-        style={styles.input}
+        style={[styles.input, { color: "black" }]} // Ensures text is black
       />
       <TextInput
         placeholder="Password"
+        placeholderTextColor="#888"
         value={password}
-        secureTextEntry
         onChangeText={setPassword}
-        style={styles.input}
+        secureTextEntry
+      style={[styles.input, { color: "black" }]}
       />
+
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
       ) : (
-        <Button title="Login" onPress={handleLogin} />
+        <Pressable style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
       )}
-      <View style={styles.registerContainer}>
-        <Button title="Go to Register" onPress={() => navigation.navigate("Register")} />
-      </View>
+
+      <Pressable style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
+        <Text style={styles.registerText}>Don't have an account? Register</Text>
+      </Pressable>
     </View>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 16 },
-  title: { fontSize: 24, marginBottom: 16, textAlign: "center" },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    padding: 12,
+    borderRadius: 6,
     marginBottom: 12,
-    padding: 8,
-    borderRadius: 4,
   },
   errorText: {
     color: "red",
-    marginBottom: 8,
     textAlign: "center",
+    marginBottom: 10,
   },
   spinner: {
     marginVertical: 16,
   },
-  registerContainer: {
-    marginTop: 16,
+  button: {
+    backgroundColor: "#007BFF",
+    padding: 14,
+    borderRadius: 6,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  registerButton: {
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  registerText: {
+    color: "#007BFF",
+    fontSize: 14,
   },
 });
