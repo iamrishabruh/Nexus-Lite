@@ -10,8 +10,8 @@ frontend/web-build/
 backend/venv/
 
 # Python caches (backend)
-**/__pycache__/
-**/*.pyc
+backend/__pycache__/
+backend/*.pyc
 
 # Environment variables
 backend/.env
