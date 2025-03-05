@@ -15,6 +15,30 @@ class HealthDataRequest(BaseModel):
     bp: str
     glucose: float
 
+    @validator('weight')
+    def validate_weight(cls, v):
+        if v <= 0:
+            raise ValueError('Weight must be a positive number')
+        return round(v, 2)
+
+    @validator('glucose')
+    def validate_glucose(cls, v):
+        if v <= 0:
+            raise ValueError('Glucose level must be a positive number')
+        return round(v, 2)
+
+    @validator('bp')
+    def validate_blood_pressure(cls, v):
+        v = v.replace(' ', '')
+        if not re.match(r'^\d{2,3}/\d{2,3}$', v):
+            raise ValueError('Blood pressure must be in format "systolic/diastolic" (e.g., 120/80)')
+        systolic, diastolic = map(int, v.split('/'))
+        if systolic < 70 or systolic > 250:
+            raise ValueError('Systolic pressure must be between 70 and 250')
+        if diastolic < 40 or diastolic > 150:
+            raise ValueError('Diastolic pressure must be between 40 and 150')
+        return v
+
 class HealthDataResponse(BaseModel):
     id: int
     weight: float
