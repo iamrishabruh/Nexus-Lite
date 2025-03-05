@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "npx expo start -c",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
+    "web": "npx expo start --web"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@expo/ngrok": "^4.1.0",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/cli": "latest",
     "@react-navigation/native": "^7.0.14",
@@ -17,7 +18,7 @@
     "@react-navigation/stack": "^7.1.1",
     "@tanstack/react-query": "^5.66.0",
     "axios": "^1.7.9",
-    "expo": "~52.0.35",
+    "expo": "~52.0.36",
     "expo-status-bar": "~2.0.1",
     "native-base": "^3.4.28",
     "react": "18.3.1",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
+    "@types/react-native": "^0.73.0",
     "typescript": "^5.3.3"
   },
   "private": true

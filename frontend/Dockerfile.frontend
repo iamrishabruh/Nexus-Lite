@@ -1,0 +1,20 @@
+# Dockerfile.frontend
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files and install dependencies.
+COPY package.json package-lock.json ./
+# Use npm install
+RUN npm cache clean --force && npm install
+
+# Copy the rest of the app source.
+COPY . .
+
+# Expose ports used by Expo (adjust if needed)
+# 19000 - Metro Bundler; 19001, 19002, 19006 are commonly used by Expo for tunnels and development
+EXPOSE 8081 19000 19001 19002 19006
+
+# Run the start script (which should be "expo start")
+CMD ["npm", "run", "start"]

@@ -5,9 +5,9 @@ import openai
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from .database import get_db
-from .models import HealthData, User
-from .utils import decode_access_token
+from database import get_db
+from models import HealthData, User
+from utils import decode_access_token
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 

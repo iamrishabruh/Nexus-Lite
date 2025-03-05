@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=your-very-secret-key
+      - OPENAI_API_KEY=sk-your-openai-key
+      - DB_URL=sqlite:///./nexus_lite.db
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_MINUTES=60
+    volumes:
+      - ./backend:/app  # Optional: mount for live code reloading in development
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "19006:19006"
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:8000
+      
+    stdin_open: true  # Keeps STDIN open (interactive)
+    tty: true         # Allocates a pseudo-TTY
+    volumes:
+      - ./frontend:/app  # Optional: mount for live reloading in development

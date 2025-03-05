@@ -2,11 +2,11 @@
 
 import uvicorn
 from fastapi import FastAPI
-from .database import engine, get_db
-from .models import Base
-from .auth import router as auth_router
-from .healthdata import router as healthdata_router
-from .ai import router as ai_router
+from database import engine
+from models import Base
+from auth import router as auth_router
+from healthdata import router as healthdata_router
+from ai import router as ai_router
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Nexus-Lite API", version="1.0.0")

@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
-from .database import get_db
-from .models import HealthData, User
-from .utils import decode_access_token
+from database import get_db
+from models import HealthData, User
+from utils import decode_access_token
 
 router = APIRouter(prefix="/healthdata", tags=["healthdata"])
 
