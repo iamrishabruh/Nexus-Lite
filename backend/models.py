@@ -1,6 +1,6 @@
 # backend/models.py
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -23,3 +23,11 @@ class HealthData(Base):
     glucose = Column(Float, nullable=True)
     #Relationship to user
     user = relationship("User", back_populates="health_entries") 
+
+class AIInsight(Base):
+    _tablename_ = "ai_insights" 
+    id = Column(Integer, primary_key=True, index=True) 
+    health_data_id = patient_id = Column(Integer, ForeignKey("health_data.id"), nullable=False) #connects insight to healthdata
+    insight = Column(Text, nullable=True)
+    health_entries = relationship("HealthData", back_populates="ai_insights")
+
