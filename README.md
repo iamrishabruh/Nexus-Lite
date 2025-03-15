@@ -85,6 +85,7 @@ ________________________________________________________________________________
       - backend: Contains the FastAPI backend.
       - frontend: Contains the React Native/Expo frontend.
 
+_______________________________________________________________________________________________________________________________________
 
 *Backend Setup*
   1. Navigate to the backend directory:
@@ -127,6 +128,7 @@ ________________________________________________________________________________
 
   6. The FastAPI server should be running locally, and endpoints such as /auth/login and /auth/register will be accessible.
 
+_______________________________________________________________________________________________________________________________________
 
 *Frontend Setup*
 
