@@ -2,7 +2,7 @@
 
 Nexus is a mobile health-tracking application designed to assist individuals in managing their daily health routines by tracking vital health information and providing advice through a user-friendly smartphone app. Built with React Native, it supports both Android and iOS platforms with a single codebase.
 _______________________________________________________________________________________________________________________________________
-**Key Features**
+## **Key Features**
 
   - *User Authentication*
 
@@ -21,7 +21,7 @@ ________________________________________________________________________________
       - Use of secure protocols (HTTPS) for data protection during transit.
       - Regular backups to prevent data loss.
 _______________________________________________________________________________________________________________________________________
-**System Architecture**
+## **System Architecture**
 
   - *Frontend*
 
@@ -33,7 +33,7 @@ ________________________________________________________________________________
       - Built with Python (FastAPI) for managing user authentication and data storage.
       - Utilizes an SQL database for structured data like medical records.
 _______________________________________________________________________________________________________________________________________
-**Development Guidelines**
+## **Development Guidelines**
 
   - *Code Management*
 
@@ -46,7 +46,7 @@ ________________________________________________________________________________
       - Comprehensive testing of new features and bug fixes.
       - Use of automated testing tools to ensure code quality.
 _______________________________________________________________________________________________________________________________________
-**Contribution Process**
+## **Contribution Process**
 
   1. Fork the Repository
 
@@ -64,7 +64,7 @@ ________________________________________________________________________________
 
       - Submit changes for review and integration into the main repository.
 _______________________________________________________________________________________________________________________________________
-**Prerequisites**
+## **Prerequisites**
 
 Before you begin, ensure you have met the following requirements:
 
@@ -74,7 +74,7 @@ Before you begin, ensure you have met the following requirements:
   4. Make sure you have the Expo CLI installed globally.
   5. Make sure you have Python installed. (and on PATH)
 _______________________________________________________________________________________________________________________________________
-**Installation and Setup**
+## **Installation and Setup**
 
 *Cloning the Repository*
   - Clone the repository to your local machine.
@@ -87,7 +87,7 @@ ________________________________________________________________________________
 
 _______________________________________________________________________________________________________________________________________
 
-*Backend Setup*
+## *Backend Setup*
   1. Navigate to the backend directory:
 
       ```bash
@@ -130,7 +130,7 @@ ________________________________________________________________________________
 
 _______________________________________________________________________________________________________________________________________
 
-*Frontend Setup*
+## *Frontend Setup*
 
   1. Open another terminal or command line window.
 
@@ -155,7 +155,7 @@ ________________________________________________________________________________
       - Press i if you have an iOS simulator installed (requires Xcode).
       - Alternatively, scan the QR code using the Expo Go app from the App Store.
 _______________________________________________________________________________________________________________________________________
-**Development Notes**
+## **Development Notes**
 
   - The current setup allows for login and registration functionality, though they may not be fully operational.
   - Use tools like Postman or curl for testing endpoints.
