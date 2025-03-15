@@ -101,13 +101,13 @@ ________________________________________________________________________________
   
   3. Activate the virtual environment:
 
-    - On macOS/Linux:
+      On macOS/Linux:
         
           ```bash
           source venv/bin/activate
           ```
           
-    - On Windows:
+      On Windows:
         
           ```bash
           .\venv\Scripts\activate
