@@ -103,15 +103,15 @@ ________________________________________________________________________________
 
       On macOS/Linux:
         
-          ```bash
+          
           source venv/bin/activate
-          ```
+          
           
       On Windows:
         
-          ```bash
+          
           .\venv\Scripts\activate
-          ```
+          
 
   4. Install the required packages:
 
