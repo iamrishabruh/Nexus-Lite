@@ -79,69 +79,81 @@ ________________________________________________________________________________
 *Cloning the Repository*
   - Clone the repository to your local machine.
 
+
 *Project Structure*
   - The repository contains two main folders:
       - backend: Contains the FastAPI backend.
       - frontend: Contains the React Native/Expo frontend.
 
+
 *Backend Setup*
   1. Navigate to the backend directory:
-  ```bash
-  cd backend
-  ```
 
-  2. Create a virtual environment:
-  ```bash
-  python -m venv venv
-  ```
+      ```bash
+      cd backend
+      ```
+
+  3. Create a virtual environment:
+ 
+      ```bash
+      python -m venv venv
+      ```
   
   3. Activate the virtual environment:
 
     - On macOS/Linux:
-      ```bash
-      source venv/bin/activate
-      ```
+        
+          ```bash
+          source venv/bin/activate
+          ```
     - On Windows:
-      ```bash
-      .\venv\Scripts\activate
-      ```
+        
+          ```bash
+          .\venv\Scripts\activate
+          ```
 
   4. Install the required packages:
-  ```bash
-  pip install -r requirements.txt
-  ```
+
+      ```bash
+      pip install -r requirements.txt
+      ```
 
   5. Start the FastAPI backend:
-  ```bash
-  python -m uvicorn backend.main:app --reload
-  ```
+  
+      ```bash
+      python -m uvicorn backend.main:app --reload
+      ```
 
   6. The FastAPI server should be running locally, and endpoints such as /auth/login and /auth/register will be accessible.
+
 
 *Frontend Setup*
 
   1. Open another terminal or command line window.
 
   2. Navigate to the frontend directory:
-  ```bash
-  cd frontend
-  ```
+   
+      ```bash
+      cd frontend
+      ```
   3. Install the necessary packages:
-  ```bash
-  yarn install
-  ```
+  
+      ```bash
+      yarn install
+      ```
   4. Start the Expo development server:
-  ```bash
-  npx expo start -c
-  ```
+  
+      ```bash
+      npx expo start -c
+      ```
   5. To view the app:
 
-    - Press w to run on a web browser.
-    - Press i if you have an iOS simulator installed (requires Xcode).
-    - Alternatively, scan the QR code using the Expo Go app from the App Store.
+      - Press w to run on a web browser.
+      - Press i if you have an iOS simulator installed (requires Xcode).
+      - Alternatively, scan the QR code using the Expo Go app from the App Store.
 _______________________________________________________________________________________________________________________________________
 **Development Notes**
 
-- The current setup allows for login and registration functionality, though they may not be fully operational.
-- Use tools like Postman or curl for testing endpoints.
-- The Expo Go app facilitates live reloading for development on mobile devices.
+  - The current setup allows for login and registration functionality, though they may not be fully operational.
+  - Use tools like Postman or curl for testing endpoints.
+  - The Expo Go app facilitates live reloading for development on mobile devices.
