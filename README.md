@@ -104,13 +104,13 @@ ________________________________________________________________________________
       On macOS/Linux:
         
           
-          source venv/bin/activate
+       source venv/bin/activate
           
           
       On Windows:
         
           
-          .\venv\Scripts\activate
+       .\venv\Scripts\activate
           
 
   4. Install the required packages:
