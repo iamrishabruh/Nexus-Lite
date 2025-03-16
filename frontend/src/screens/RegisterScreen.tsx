@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from "react";
-import { 
-  View, 
-  Text, 
+import {
+  SafeAreaView,
+  View,
+  Text,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView, 
-  StyleSheet, 
+  KeyboardAvoidingView,
+  StyleSheet,
   ActivityIndicator,
-  Platform
+  Platform,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -28,37 +29,34 @@ const RegisterSchema = Yup.object().shape({
     .required("Confirm Password is required"),
 });
 
-export default function RegisterScreen({ navigation }: Props) {
-const [loading, setLoading] = useState(false);
-  // ADDED: States to toggle password visibility for both fields
+const RegisterScreen = ({ navigation }: Props) => {
+  const [loading, setLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [secureTextEntryConfirm, setSecureTextEntryConfirm] = useState(true);
 
-  // ADDED: Toggle functions for password visibility
   const togglePasswordVisibility = useCallback(() => {
-    setSecureTextEntry(prev => !prev);
+    setSecureTextEntry((prev) => !prev);
   }, []);
 
   const toggleConfirmPasswordVisibility = useCallback(() => {
-    setSecureTextEntryConfirm(prev => !prev);
+    setSecureTextEntryConfirm((prev) => !prev);
   }, []);
 
-  // ADDED: Advanced handler using Formik values and Yup errors
   const handleRegister = async (
     values: { firstName: string; lastName: string; email: string; password: string; confirmPassword: string },
     { setFieldError, resetForm }: any
   ) => {
     setLoading(true);
     try {
-      await registerUser({ 
-        firstName: values.firstName, 
-        lastName: values.lastName, 
-        email: values.email, 
-        password: values.password 
+      await registerUser({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
       });
       resetForm();
       navigation.navigate("Login");
-      } catch (error: any) {
+    } catch (error: any) {
       console.error("Registration error:", error);
       setFieldError("general", error.response?.data?.detail || "An unexpected error occurred.");
     } finally {
@@ -66,12 +64,9 @@ const [loading, setLoading] = useState(false);
     }
   };
 
- return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={styles.container}>
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <Text style={styles.title}>Create Account</Text>
         <Formik
           initialValues={{ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" }}
@@ -80,10 +75,7 @@ const [loading, setLoading] = useState(false);
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <>
-              {/* Display any general error */}
               {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
-
-              {/* First Name Field */}
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="First Name"
@@ -96,8 +88,6 @@ const [loading, setLoading] = useState(false);
                 />
                 {errors.firstName && touched.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
               </View>
-
-              {/* Last Name Field */}
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Last Name"
@@ -110,8 +100,6 @@ const [loading, setLoading] = useState(false);
                 />
                 {errors.lastName && touched.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
               </View>
-
-              {/* Email Field */}
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Email"
@@ -125,8 +113,6 @@ const [loading, setLoading] = useState(false);
                 />
                 {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
               </View>
-
-              {/* Password Field with Visibility Toggle */}
               <View style={styles.inputContainer}>
                 <View style={styles.passwordContainer}>
                   <TextInput
@@ -145,8 +131,6 @@ const [loading, setLoading] = useState(false);
                 </View>
                 {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
               </View>
-
-              {/* Confirm Password Field with Visibility Toggle */}
               <View style={styles.inputContainer}>
                 <View style={styles.passwordContainer}>
                   <TextInput
@@ -163,10 +147,10 @@ const [loading, setLoading] = useState(false);
                     <Icon name={secureTextEntryConfirm ? "eye-off" : "eye"} size={24} color="#888" />
                   </TouchableOpacity>
                 </View>
-                {errors.confirmPassword && touched.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                )}
               </View>
-
-              {/* Loading indicator or Create Account Button */}
               {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
               ) : (
@@ -177,66 +161,65 @@ const [loading, setLoading] = useState(false);
             </>
           )}
         </Formik>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
 
+export default RegisterScreen;
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    justifyContent: "center", // Centers everything vertically
-    alignItems: "center", // Centers everything horizontally
-    padding: 16, 
-    backgroundColor: "#fff",
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f2f2f2",
   },
-  title: { 
-    fontSize: 24, 
-    marginBottom: 16, 
-    textAlign: "center", 
-    fontWeight: "bold" 
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  inputContainer: {
+    marginBottom: 12,
   },
   input: {
-    width: "90%", // Makes input fields responsive
     borderWidth: 1,
     borderColor: "#ccc",
-    backgroundColor: "#f9f9f9",
-    marginBottom: 12,
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 6,
   },
-   inputContainer: {
-    width: "90%",
-    marginBottom: 12,
-  },
-    passwordContainer: {
+  passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     borderRadius: 6,
     paddingRight: 12,
   },
-    eyeIcon: {
+  eyeIcon: {
     padding: 10,
   },
   errorText: {
     color: "red",
-    marginBottom: 8,
     textAlign: "center",
+    marginBottom: 8,
   },
   spinner: {
     marginVertical: 16,
   },
   button: {
-    width: "90%", // Makes button same width as inputs
     backgroundColor: "#007BFF",
-    paddingVertical: 14,
+    padding: 14,
     borderRadius: 6,
     alignItems: "center",
-    marginTop: 20, // Adds space above the button
+    marginVertical: 10,
   },
   buttonText: {
     color: "#fff",

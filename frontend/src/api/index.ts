@@ -1,4 +1,3 @@
-// frontend/src/api/index.ts
 import axios from "axios";
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
@@ -7,4 +6,3 @@ const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 export default apiClient;
-
