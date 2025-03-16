@@ -1,7 +1,6 @@
-# backend/models.py
-
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -10,24 +9,27 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
-
-    # Relationship to health data
-    health_entries = relationship("HealthData", back_populates="user") #One to optional many relationship
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    # One-to-many relationship with HealthData
+    health_entries = relationship("HealthData", back_populates="user")
 
 class HealthData(Base):
     __tablename__ = "health_data"
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False) #references user.id from User table
-    weight = Column(Float, nullable=True) #health metrics are nullable since a user can have 0 to many health metrics
-    bp = Column(String, nullable=True)  # blood pressure
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    weight = Column(Float, nullable=True)
+    bp = Column(String, nullable=True)
     glucose = Column(Float, nullable=True)
-    #Relationship to user
-    user = relationship("User", back_populates="health_entries") 
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    # Relationship back to user and AI insights
+    user = relationship("User", back_populates="health_entries")
+    ai_insights = relationship("AIInsight", back_populates="health_data")
 
 class AIInsight(Base):
-    _tablename_ = "ai_insights" 
-    id = Column(Integer, primary_key=True, index=True) 
-    health_data_id = patient_id = Column(Integer, ForeignKey("health_data.id"), nullable=False) #connects insight to healthdata
+    __tablename__ = "ai_insights"
+    id = Column(Integer, primary_key=True, index=True)
+    health_data_id = Column(Integer, ForeignKey("health_data.id"), nullable=False)
     insight = Column(Text, nullable=True)
-    health_entries = relationship("HealthData", back_populates="ai_insights")
-
+    # Relationship back to health data
+    health_data = relationship("HealthData", back_populates="ai_insights")

@@ -1,13 +1,14 @@
-# backend/healthdata.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel, validator
 from database import get_db
+from datetime import datetime
 from models import HealthData, User
 from utils import decode_access_token
 import re
+from fastapi import Header
+
 
 router = APIRouter(prefix="/healthdata", tags=["healthdata"])
 
@@ -45,11 +46,18 @@ class HealthDataResponse(BaseModel):
     weight: float
     bp: str
     glucose: float
+    timestamp: datetime
 
-def get_current_user(token: str = Depends(lambda: None), db: Session = Depends(get_db)) -> User:
-    if not token:
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
+    if not authorization:
         raise HTTPException(status_code=401, detail="Token missing")
-
+    
+    # Expect header in form "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    
+    token = parts[1]
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -58,7 +66,7 @@ def get_current_user(token: str = Depends(lambda: None), db: Session = Depends(g
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
-
+    
     return user
 
 @router.post("/", response_model=dict)

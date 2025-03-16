@@ -1,5 +1,3 @@
-# backend/auth.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -10,6 +8,8 @@ from utils import hash_password, verify_password, create_access_token
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 class RegisterRequest(BaseModel):
+    firstName: str
+    lastName: str
     email: EmailStr
     password: str
 
@@ -26,11 +26,15 @@ def register_user(request: RegisterRequest, db: Session = Depends(get_db)):
 
     # Hash the password and save the user
     hashed_password = hash_password(request.password)
-    new_user = User(email=request.email, password=hashed_password)
+    new_user = User(
+        email=request.email, 
+        password=hashed_password,
+        first_name=request.firstName,
+        last_name=request.lastName
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-
     return {"message": "User registered successfully"}
 
 @router.post("/login")

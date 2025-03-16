@@ -1,15 +1,21 @@
-import React, { useState } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  ActivityIndicator, 
-  StyleSheet 
+import React, { useState, useCallback } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { loginUser } from "../api/auth";
-import { Pressable } from "react-native";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import Icon from "react-native-vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -18,7 +24,7 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
-export default function LoginScreen({ navigation }: Props) {
+const LoginScreen = ({ navigation }: Props) => {
   const [loading, setLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
 
@@ -26,40 +32,35 @@ export default function LoginScreen({ navigation }: Props) {
     setSecureTextEntry((prev) => !prev);
   }, []);
 
-const handleLogin = useCallback(async (values: { email: string; password: string }, { setFieldError }: any) => {
-    setLoading(true);
-    try {
-      const data = await loginUser({ email: values.email, password: values.password });
-      if (data?.access_token) {
-        navigation.navigate("Dashboard", { token: data.access_token });
-      } else {
-        setFieldError("general", "Invalid login credentials.");
+  const handleLogin = useCallback(
+    async (values: { email: string; password: string }, { setFieldError }: any) => {
+      setLoading(true);
+      try {
+        const data = await loginUser({ email: values.email, password: values.password });
+        if (data?.access_token) {
+          navigation.navigate("Dashboard", { token: data.access_token });
+        } else {
+          setFieldError("general", "Invalid login credentials.");
+        }
+      } catch (error: any) {
+        console.error("Login error:", error);
+        setFieldError("general", error.response?.data?.detail || "Login failed. Try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setFieldError("general", error.response?.data?.detail || "Login failed. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [navigation]);
+    },
+    [navigation]
+  );
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-        <Formik
-          initialValues={{ email: "", password: "" }}
-          validationSchema={LoginSchema}
-          onSubmit={handleLogin}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <>
-          {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
-        
- <View style={styles.inputContainer}>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <Text style={styles.title}>Login</Text>
+        <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleLogin}>
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
+              <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Email"
                   placeholderTextColor="#888"
@@ -70,9 +71,8 @@ const handleLogin = useCallback(async (values: { email: string; password: string
                   onBlur={handleBlur("email")}
                   value={values.email}
                 />
-        {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
- </View>
-              
+                {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
+              </View>
               <View style={styles.inputContainer}>
                 <View style={styles.passwordContainer}>
                   <TextInput
@@ -92,61 +92,62 @@ const handleLogin = useCallback(async (values: { email: string; password: string
                 </View>
                 {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
               </View>
-            
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-      ) : (
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
+              ) : (
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                   <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
-      )}
-
- <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
+              )}
+              <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
                 <Text style={styles.registerText}>Don't have an account? Register</Text>
               </TouchableOpacity>
             </>
           )}
         </Formik>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
 
-// Styles
+export default LoginScreen;
+
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f2f2f2",
+  },
   container: {
     flex: 1,
+    padding: 16,
     justifyContent: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
-    inputContainer: {
+  inputContainer: {
     marginBottom: 12,
-    },
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 6,
-    marginBottom: 12,
   },
-   passwordContainer: {
+  passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     borderRadius: 6,
     paddingRight: 12,
   },
-    eyeIcon: {
+  eyeIcon: {
     padding: 10,
   },
   errorText: {

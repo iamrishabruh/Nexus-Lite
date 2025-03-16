@@ -1,4 +1,3 @@
-// src/api/auth.ts
 import apiClient from "./index";
 
 interface RegisterPayload {

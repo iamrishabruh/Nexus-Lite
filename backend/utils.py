@@ -1,5 +1,3 @@
-# backend/utils.py
-
 import os
 import jwt
 import datetime
