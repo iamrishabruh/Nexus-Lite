@@ -1,6 +1,5 @@
-// src/screens/HealthForm.tsx
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { logHealthData } from "../api/healthdata";
@@ -12,25 +11,33 @@ export default function HealthForm({ route, navigation }: Props) {
   const [weight, setWeight] = useState<string>("");
   const [bp, setBp] = useState<string>("");
   const [glucose, setGlucose] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!token) return;
+    setLoading(true);
+    setErrorMessage(null);
+
     try {
       await logHealthData(token, {
         weight: parseFloat(weight),
         bp,
-        glucose: parseFloat(glucose)
+        glucose: parseFloat(glucose),
       });
-      Alert.alert("Success", "Health data recorded");
+      Alert.alert("Success", "Health data recorded successfully");
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert("Error", error.response?.data?.detail || "Unknown error occurred");
+      setErrorMessage(error.response?.data?.detail || "An unknown error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Log Health Data</Text>
+      {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
       <TextInput
         style={styles.input}
         placeholder="Weight"
@@ -51,7 +58,11 @@ export default function HealthForm({ route, navigation }: Props) {
         value={glucose}
         onChangeText={setGlucose}
       />
-      <Button title="Submit" onPress={handleSubmit} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : (
+        <Button title="Submit" onPress={handleSubmit} />
+      )}
     </View>
   );
 }
@@ -64,6 +75,11 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     marginBottom: 12,
     padding: 8,
-    borderRadius: 4
-  }
+    borderRadius: 4,
+  },
+  error: {
+    color: "red",
+    marginBottom: 12,
+    textAlign: "center",
+  },
 });
