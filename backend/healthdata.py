@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel, validator
-from database import get_db
+from pydantic import BaseModel, field_validator
+from .database import get_db
 from datetime import datetime
-from models import HealthData, User
-from utils import decode_access_token
+from .models import HealthData, User
+from .utils import decode_access_token
 import re
 from fastapi import Header
 
@@ -17,19 +17,22 @@ class HealthDataRequest(BaseModel):
     bp: str
     glucose: float
 
-    @validator('weight')
+    @field_validator('weight')
+    @classmethod
     def validate_weight(cls, v):
         if v <= 0:
             raise ValueError('Weight must be a positive number')
         return round(v, 2)
 
-    @validator('glucose')
+    @field_validator('glucose')
+    @classmethod
     def validate_glucose(cls, v):
         if v <= 0:
             raise ValueError('Glucose level must be a positive number')
         return round(v, 2)
 
-    @validator('bp')
+    @field_validator('bp')
+    @classmethod
     def validate_blood_pressure(cls, v):
         v = v.replace(' ', '')
         if not re.match(r'^\d{2,3}/\d{2,3}$', v):
