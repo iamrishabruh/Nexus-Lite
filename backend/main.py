@@ -1,10 +1,10 @@
 import uvicorn
 import os
 from fastapi import FastAPI
-from .database import engine
-from .models import Base
+from backend.database import engine
+from backend.models import Base
 from backend.auth import router as auth_router
-from .healthdata import router as healthdata_router
+from backend.healthdata import router as healthdata_router
 # if os.getenv("TESTING") != "true":
 # from ai import router as ai_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,7 +32,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(healthdata_router)
     if os.getenv("TESTING") != "true":
-        from ai import router as ai_router
+        from backend.ai import router as ai_router
         app.include_router(ai_router)
     
     return app
