@@ -5,10 +5,10 @@ import {
   Text,
   TextInput,
   ActivityIndicator,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -16,6 +16,7 @@ import { loginUser } from "../api/auth";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Icon from "react-native-vector-icons/Ionicons";
+import { COLORS, commonStyles } from "../theme/styles";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -53,58 +54,78 @@ const LoginScreen = ({ navigation }: Props) => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Text style={styles.title}>Login</Text>
-        <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleLogin}>
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-            <>
-              {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Email"
-                  placeholderTextColor="#888"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.input}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  value={values.email}
-                />
-                {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    placeholder="Password"
-                    placeholderTextColor="#888"
-                    autoCapitalize="none"
-                    secureTextEntry={secureTextEntry}
-                    style={[styles.input, { flex: 1 }]}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    value={values.password}
-                    onSubmitEditing={handleSubmit}
-                  />
-                  <TouchableOpacity onPress={toggleSecureEntry} style={styles.eyeIcon}>
-                    <Icon name={secureTextEntry ? "eye-off" : "eye"} size={24} color="#888" />
-                  </TouchableOpacity>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <KeyboardAvoidingView 
+        style={commonStyles.container} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <View style={styles.logoContainer}>
+          <Text style={styles.appName}>Nexus Health</Text>
+          <Text style={styles.tagline}>Track your health journey</Text>
+        </View>
+        
+        <View style={styles.formContainer}>
+          <Text style={commonStyles.title}>Sign In</Text>
+          <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleLogin}>
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+              <>
+                {errors.general && <Text style={commonStyles.errorText}>{errors.general}</Text>}
+                
+                <View style={commonStyles.inputContainer}>
+                  <Text style={commonStyles.inputLabel}>Email</Text>
+                  <View style={styles.inputWrapper}>
+                    <Icon name="mail-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
+                    <TextInput
+                      placeholder="Enter your email"
+                      placeholderTextColor={COLORS.inactive}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      style={commonStyles.input}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      value={values.email}
+                    />
+                  </View>
+                  {errors.email && touched.email && <Text style={commonStyles.errorText}>{errors.email}</Text>}
                 </View>
-                {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
-              </View>
-              {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-              ) : (
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                  <Text style={styles.buttonText}>Login</Text>
+                
+                <View style={commonStyles.inputContainer}>
+                  <Text style={commonStyles.inputLabel}>Password</Text>
+                  <View style={styles.inputWrapper}>
+                    <Icon name="lock-closed-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
+                    <TextInput
+                      placeholder="Enter your password"
+                      placeholderTextColor={COLORS.inactive}
+                      autoCapitalize="none"
+                      secureTextEntry={secureTextEntry}
+                      style={[commonStyles.input, { flex: 1 }]}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      value={values.password}
+                      onSubmitEditing={handleSubmit}
+                    />
+                    <TouchableOpacity onPress={toggleSecureEntry} style={styles.eyeIcon}>
+                      <Icon name={secureTextEntry ? "eye-off" : "eye"} size={20} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.password && touched.password && <Text style={commonStyles.errorText}>{errors.password}</Text>}
+                </View>
+                
+                {loading ? (
+                  <ActivityIndicator size="large" color={COLORS.primary} style={styles.spinner} />
+                ) : (
+                  <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
+                    <Text style={commonStyles.buttonText}>Sign In</Text>
+                  </TouchableOpacity>
+                )}
+                
+                <TouchableOpacity style={commonStyles.textButton} onPress={() => navigation.navigate("Register")}>
+                  <Text style={commonStyles.textButtonText}>Don't have an account? Create one</Text>
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
-                <Text style={styles.registerText}>Don't have an account? Register</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </Formik>
+              </>
+            )}
+          </Formik>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -112,70 +133,55 @@ const LoginScreen = ({ navigation }: Props) => {
 
 export default LoginScreen;
 
+import { StyleSheet } from "react-native";
+
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
   },
-  container: {
-    flex: 1,
-    padding: 16,
-    justifyContent: "center",
+  appName: {
+    fontSize: 32,
+    color: COLORS.primary,
+    fontWeight: "700",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 24,
+  tagline: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginTop: 8,
   },
-  inputContainer: {
-    marginBottom: 12,
+  formContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 6,
-  },
-  passwordContainer: {
+  inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    paddingRight: 12,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 12,
+  },
+  inputIcon: {
+    marginLeft: 16,
+    marginRight: 8,
   },
   eyeIcon: {
-    padding: 10,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
+    padding: 16,
   },
   spinner: {
-    marginVertical: 16,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 14,
-    borderRadius: 6,
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  registerButton: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  registerText: {
-    color: "#007BFF",
-    fontSize: 14,
+    marginVertical: 20,
   },
 });

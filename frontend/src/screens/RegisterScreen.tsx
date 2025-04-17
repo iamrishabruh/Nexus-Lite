@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
+  ScrollView,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -16,6 +17,7 @@ import { registerUser } from "../api/auth";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Icon from "react-native-vector-icons/Ionicons";
+import { COLORS, commonStyles } from "../theme/styles";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -65,102 +67,143 @@ const RegisterScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Text style={styles.title}>Create Account</Text>
-        <Formik
-          initialValues={{ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" }}
-          validationSchema={RegisterSchema}
-          onSubmit={handleRegister}
-        >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-            <>
-              {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="First Name"
-                  placeholderTextColor="#888"
-                  autoCapitalize="words"
-                  style={styles.input}
-                  onChangeText={handleChange("firstName")}
-                  onBlur={handleBlur("firstName")}
-                  value={values.firstName}
-                />
-                {errors.firstName && touched.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Last Name"
-                  placeholderTextColor="#888"
-                  autoCapitalize="words"
-                  style={styles.input}
-                  onChangeText={handleChange("lastName")}
-                  onBlur={handleBlur("lastName")}
-                  value={values.lastName}
-                />
-                {errors.lastName && touched.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Email"
-                  placeholderTextColor="#888"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  style={styles.input}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  value={values.email}
-                />
-                {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    placeholder="Password"
-                    placeholderTextColor="#888"
-                    secureTextEntry={secureTextEntry}
-                    autoCapitalize="none"
-                    style={[styles.input, { flex: 1 }]}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    value={values.password}
-                  />
-                  <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                    <Icon name={secureTextEntry ? "eye-off" : "eye"} size={24} color="#888" />
+    <SafeAreaView style={commonStyles.safeArea}>
+      <KeyboardAvoidingView 
+        style={commonStyles.container} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Icon name="chevron-back" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+            <Text style={commonStyles.title}>Create Account</Text>
+          </View>
+          
+          <View style={styles.formContainer}>
+            <Formik
+              initialValues={{ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" }}
+              validationSchema={RegisterSchema}
+              onSubmit={handleRegister}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                <>
+                  {errors.general && <Text style={commonStyles.errorText}>{errors.general}</Text>}
+                  
+                  <View style={styles.nameRow}>
+                    <View style={[commonStyles.inputContainer, { flex: 1, marginRight: 8 }]}>
+                      <Text style={commonStyles.inputLabel}>First Name</Text>
+                      <TextInput
+                        placeholder="First Name"
+                        placeholderTextColor={COLORS.inactive}
+                        autoCapitalize="words"
+                        style={commonStyles.input}
+                        onChangeText={handleChange("firstName")}
+                        onBlur={handleBlur("firstName")}
+                        value={values.firstName}
+                      />
+                      {errors.firstName && touched.firstName && <Text style={commonStyles.errorText}>{errors.firstName}</Text>}
+                    </View>
+                    
+                    <View style={[commonStyles.inputContainer, { flex: 1, marginLeft: 8 }]}>
+                      <Text style={commonStyles.inputLabel}>Last Name</Text>
+                      <TextInput
+                        placeholder="Last Name"
+                        placeholderTextColor={COLORS.inactive}
+                        autoCapitalize="words"
+                        style={commonStyles.input}
+                        onChangeText={handleChange("lastName")}
+                        onBlur={handleBlur("lastName")}
+                        value={values.lastName}
+                      />
+                      {errors.lastName && touched.lastName && <Text style={commonStyles.errorText}>{errors.lastName}</Text>}
+                    </View>
+                  </View>
+                  
+                  <View style={commonStyles.inputContainer}>
+                    <Text style={commonStyles.inputLabel}>Email</Text>
+                    <View style={styles.inputWrapper}>
+                      <Icon name="mail-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
+                      <TextInput
+                        placeholder="Email address"
+                        placeholderTextColor={COLORS.inactive}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        style={commonStyles.input}
+                        onChangeText={handleChange("email")}
+                        onBlur={handleBlur("email")}
+                        value={values.email}
+                      />
+                    </View>
+                    {errors.email && touched.email && <Text style={commonStyles.errorText}>{errors.email}</Text>}
+                  </View>
+                  
+                  <View style={commonStyles.inputContainer}>
+                    <Text style={commonStyles.inputLabel}>Password</Text>
+                    <View style={styles.inputWrapper}>
+                      <Icon name="lock-closed-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
+                      <TextInput
+                        placeholder="Password (min 6 characters)"
+                        placeholderTextColor={COLORS.inactive}
+                        secureTextEntry={secureTextEntry}
+                        autoCapitalize="none"
+                        style={[commonStyles.input, { flex: 1, borderWidth: 0 }]}
+                        onChangeText={handleChange("password")}
+                        onBlur={handleBlur("password")}
+                        value={values.password}
+                      />
+                      <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                        <Icon name={secureTextEntry ? "eye-off" : "eye"} size={20} color={COLORS.textSecondary} />
+                      </TouchableOpacity>
+                    </View>
+                    {errors.password && touched.password && <Text style={commonStyles.errorText}>{errors.password}</Text>}
+                  </View>
+                  
+                  <View style={commonStyles.inputContainer}>
+                    <Text style={commonStyles.inputLabel}>Confirm Password</Text>
+                    <View style={styles.inputWrapper}>
+                      <Icon name="lock-closed-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
+                      <TextInput
+                        placeholder="Confirm your password"
+                        placeholderTextColor={COLORS.inactive}
+                        secureTextEntry={secureTextEntryConfirm}
+                        autoCapitalize="none"
+                        style={[commonStyles.input, { flex: 1, borderWidth: 0 }]}
+                        onChangeText={handleChange("confirmPassword")}
+                        onBlur={handleBlur("confirmPassword")}
+                        value={values.confirmPassword}
+                      />
+                      <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
+                        <Icon name={secureTextEntryConfirm ? "eye-off" : "eye"} size={20} color={COLORS.textSecondary} />
+                      </TouchableOpacity>
+                    </View>
+                    {errors.confirmPassword && touched.confirmPassword && (
+                      <Text style={commonStyles.errorText}>{errors.confirmPassword}</Text>
+                    )}
+                  </View>
+                  
+                  {loading ? (
+                    <ActivityIndicator size="large" color={COLORS.primary} style={styles.spinner} />
+                  ) : (
+                    <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
+                      <Text style={commonStyles.buttonText}>Create Account</Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  <TouchableOpacity 
+                    style={commonStyles.textButton} 
+                    onPress={() => navigation.navigate("Login")}
+                  >
+                    <Text style={commonStyles.textButtonText}>Already have an account? Sign in</Text>
                   </TouchableOpacity>
-                </View>
-                {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    placeholder="Confirm Password"
-                    placeholderTextColor="#888"
-                    secureTextEntry={secureTextEntryConfirm}
-                    autoCapitalize="none"
-                    style={[styles.input, { flex: 1 }]}
-                    onChangeText={handleChange("confirmPassword")}
-                    onBlur={handleBlur("confirmPassword")}
-                    value={values.confirmPassword}
-                  />
-                  <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
-                    <Icon name={secureTextEntryConfirm ? "eye-off" : "eye"} size={24} color="#888" />
-                  </TouchableOpacity>
-                </View>
-                {errors.confirmPassword && touched.confirmPassword && (
-                  <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-                )}
-              </View>
-              {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-              ) : (
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                  <Text style={styles.buttonText}>Create Account</Text>
-                </TouchableOpacity>
+                </>
               )}
-            </>
-          )}
-        </Formik>
+            </Formik>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -169,61 +212,51 @@ const RegisterScreen = ({ navigation }: Props) => {
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
-  container: {
-    flex: 1,
-    padding: 16,
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
+  headerContainer: {
     marginBottom: 24,
   },
-  inputContainer: {
-    marginBottom: 12,
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    top: 4,
+    zIndex: 10,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 6,
+  formContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  passwordContainer: {
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    paddingRight: 12,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 12,
+  },
+  inputIcon: {
+    marginLeft: 16,
+    marginRight: 8,
   },
   eyeIcon: {
-    padding: 10,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 8,
+    padding: 16,
   },
   spinner: {
-    marginVertical: 16,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 14,
-    borderRadius: 6,
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    marginVertical: 20,
   },
 });
