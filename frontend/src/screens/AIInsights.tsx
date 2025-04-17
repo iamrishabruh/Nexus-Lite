@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, Button, ScrollView, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { getAIInsights } from "../api/ai";
+import { COLORS, commonStyles } from "../theme/styles";
+import Icon from "react-native-vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AIInsights">;
 
@@ -32,8 +43,12 @@ const AIInsights = ({ route, navigation }: Props) => {
           <Text style={styles.insightText}>{insights}</Text>
         </ScrollView>
         <View style={styles.buttonContainer}>
-          <Button title="Refresh Insights" onPress={fetchInsights} />
-          <Button title="Back to Dashboard" onPress={() => navigation.goBack()} />
+          <TouchableOpacity style={commonStyles.button} onPress={fetchInsights}>
+            <Text style={commonStyles.buttonText}>Refresh Insights</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={commonStyles.button} onPress={() => navigation.goBack()}>
+            <Text style={commonStyles.buttonText}>Back to Dashboard</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
