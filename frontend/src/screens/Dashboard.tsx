@@ -1,14 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { 
-  SafeAreaView, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  FlatList, 
-  StyleSheet, 
-  ActivityIndicator,
-  StatusBar 
-} from "react-native";
+import { SafeAreaView, View, Text, Button, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -47,78 +38,33 @@ const Dashboard = ({ route, navigation }: Props) => {
     const timestamp = new Date(item.timestamp).toLocaleString();
     return (
       <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.dateTime}>{timestamp}</Text>
-        </View>
-        
-        <View style={styles.dataRow}>
-          <View style={styles.metric}>
-            <Icon name="fitness-outline" size={24} color={COLORS.primary} />
-            <Text style={styles.metricLabel}>Weight</Text>
-            <Text style={styles.metricValue}>{item.weight} <Text style={styles.metricUnit}>lbs</Text></Text>
-          </View>
-          
-          <View style={styles.metric}>
-            <Icon name="heart-outline" size={24} color={COLORS.primary} />
-            <Text style={styles.metricLabel}>Blood Pressure</Text>
-            <Text style={styles.metricValue}>{item.bp} <Text style={styles.metricUnit}>mmHg</Text></Text>
-          </View>
-          
-          <View style={styles.metric}>
-            <Icon name="water-outline" size={24} color={COLORS.primary} />
-            <Text style={styles.metricLabel}>Glucose</Text>
-            <Text style={styles.metricValue}>{item.glucose} <Text style={styles.metricUnit}>mg/dL</Text></Text>
-          </View>
-        </View>
+        <Text style={styles.cardText}>Weight: {item.weight}</Text>
+        <Text style={styles.cardText}>BP: {item.bp}</Text>
+        <Text style={styles.cardText}>Glucose: {item.glucose}</Text>
+        <Text style={styles.cardText}>Logged on: {timestamp}</Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <View style={commonStyles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Health Dashboard</Text>
-        </View>
-        
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Dashboard</Text>
         {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>Loading your health data...</Text>
-          </View>
+          <ActivityIndicator size="large" color="#0000ff" />
         ) : entries.length > 0 ? (
           <FlatList
             data={entries}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
           />
         ) : (
-          <View style={styles.emptyContainer}>
-            <Icon name="clipboard-outline" size={80} color={COLORS.inactive} />
-            <Text style={styles.emptyText}>No health data available</Text>
-            <Text style={styles.emptySubtext}>Start tracking your health metrics today</Text>
-          </View>
+          <Text style={styles.infoText}>No health data available. Please log some data.</Text>
         )}
-        
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => navigation.navigate("HealthForm", { token })}
-          >
-            <Icon name="add-circle" size={24} color={COLORS.white} />
-            <Text style={styles.actionButtonText}>Log Health Data</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.insightsButton]}
-            onPress={() => navigation.navigate("AIInsights", { token })}
-          >
-            <Icon name="brain" size={24} color={COLORS.white} />
-            <Text style={styles.actionButtonText}>AI Insights</Text>
-          </TouchableOpacity>
+          <Button title="Log Health Data" onPress={() => navigation.navigate("HealthForm", { token })} />
+          <Button title="Get AI Insights" onPress={() => navigation.navigate("AIInsights", { token })} />
         </View>
       </View>
     </SafeAreaView>
@@ -128,109 +74,44 @@ const Dashboard = ({ route, navigation }: Props) => {
 export default Dashboard;
 
 const styles = StyleSheet.create({
-  header: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  loadingContainer: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f2f2f2",
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: COLORS.textSecondary,
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
   },
   list: {
     paddingBottom: 16,
   },
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    marginBottom: 16,
+    backgroundColor: "#fff",
+    borderRadius: 8,
     padding: 16,
-    ...SHADOWS.small,
+    marginVertical: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 16,
-  },
-  dateTime: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metric: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  metricLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-    marginBottom: 2,
-  },
-  metricValue: {
+  cardText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
+    marginBottom: 4,
   },
-  metricUnit: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: "400",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 8,
+  infoText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#666",
+    marginVertical: 20,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 16,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 6,
-  },
-  insightsButton: {
-    backgroundColor: COLORS.secondary,
-  },
-  actionButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
   },
 });

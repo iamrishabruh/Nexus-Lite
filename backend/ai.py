@@ -82,7 +82,7 @@ def get_health_insights(
     logging.info("Sending prompt to OpenAI:\n%s", prompt)
 
     try:
-        response = client.chat.completions.create(model="gpt-4",  # Use "gpt-3.5-turbo" if GPT-4 is unavailable
+        response = client.chat.completions.create(model="gpt-3.5-turbo",  # Use "gpt-3.5-turbo" if GPT-4 is unavailable
         messages=[
             {
                 "role": "system",
