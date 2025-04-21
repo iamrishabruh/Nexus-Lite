@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - SECRET_KEY=your-very-secret-key
-      - OPENAI_API_KEY=sk-your-openai-key
+      - OPENAI_API_KEY=-your-openai-key
       - DB_URL=sqlite:///./nexus_lite.db
       - JWT_ALGORITHM=HS256
       - JWT_EXPIRATION_MINUTES=60
