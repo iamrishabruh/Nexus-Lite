@@ -17,7 +17,7 @@ class HealthDataRequest(BaseModel):
     bp: str
     glucose: float
 
-    @field_validator('weight')
+    @field_validator('weight') #the field validators checks if the different health metrics follow the established conditions
     @classmethod
     def validate_weight(cls, v):
         if v <= 0:
@@ -59,7 +59,7 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
         raise HTTPException(status_code=401, detail="Invalid authorization header")
-    
+    # checks the access token of the user to see if it's valid
     token = parts[1]
     payload = decode_access_token(token)
     if not payload:
@@ -84,7 +84,7 @@ def log_health_data(
         bp=data.bp,
         glucose=data.glucose
     )
-    db.add(new_entry)
+    db.add(new_entry) #creates and adds a new health entry for the current user with the following metrics 
     db.commit()
     db.refresh(new_entry)
     return {"message": "Health data recorded", "data_id": new_entry.id}
@@ -94,5 +94,5 @@ def get_health_data(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    entries = db.query(HealthData).filter(HealthData.patient_id == current_user.id).all()
+    entries = db.query(HealthData).filter(HealthData.patient_id == current_user.id).all() #returns all health entries for current user
     return entries

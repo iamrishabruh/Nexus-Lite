@@ -19,12 +19,12 @@ class LoginRequest(BaseModel):
 
 @router.post("/register")
 def register_user(request: RegisterRequest, db: Session = Depends(get_db)):
-    # Check if user already exists
+    # Checks the database to see if user already exists
     existing_user = db.query(User).filter(User.email == request.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Hash the password and save the user
+    # Hashes the password if the user is new
     hashed_password = hash_password(request.password)
     new_user = User(
         email=request.email, 
@@ -32,22 +32,22 @@ def register_user(request: RegisterRequest, db: Session = Depends(get_db)):
         first_name=request.firstName,
         last_name=request.lastName
     )
-    db.add(new_user)
+    db.add(new_user) # creates and stores the new user in the database
     db.commit()
     db.refresh(new_user)
     return {"message": "User registered successfully"}
 
 @router.post("/login")
 def login_user(request: LoginRequest, db: Session = Depends(get_db)):
-    # Check if user exists
+    # Checks database to see if user exists
     user = db.query(User).filter(User.email == request.email).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # Verify password
+    # If the user does exist, it verifies the user's password using the database
     if not verify_password(request.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # Create JWT
+    # Once the password is verified, create JWT
     access_token = create_access_token({"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
