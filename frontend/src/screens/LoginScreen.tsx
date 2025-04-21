@@ -4,184 +4,169 @@ import {
   View,
   Text,
   TextInput,
+  StyleSheet,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
-  Image,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { loginUser } from "../api/auth";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import Icon from "react-native-vector-icons/Ionicons";
-import { COLORS, commonStyles } from "../theme/styles";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email address").required("Email is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
 const LoginScreen = ({ navigation }: Props) => {
   const [loading, setLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const toggleSecureEntry = useCallback(() => {
     setSecureTextEntry((prev) => !prev);
   }, []);
 
-  const handleLogin = useCallback(
-    async (values: { email: string; password: string }, { setFieldError }: any) => {
-      setLoading(true);
-      try {
-        const data = await loginUser({ email: values.email, password: values.password });
-        if (data?.access_token) {
-          navigation.navigate("Dashboard", { token: data.access_token });
-        } else {
-          setFieldError("general", "Invalid login credentials.");
-        }
-      } catch (error: any) {
-        console.error("Login error:", error);
-        setFieldError("general", error.response?.data?.detail || "Login failed. Try again.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [navigation]
-  );
+  const handleLogin = useCallback(async (values: { email: string; password: string }) => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const data = await loginUser({ email: values.email, password: values.password });
+      const token = data.access_token;
+      navigation.replace("Dashboard", { token });
+    } catch (error: any) {
+      const message = error.response?.data?.detail || "Login failed";
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
-      <KeyboardAvoidingView 
-        style={commonStyles.container} 
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Login</Text>
+
+      <Formik
+        initialValues={{ email: "", password: "" }}
+        validationSchema={LoginSchema}
+        onSubmit={handleLogin}
       >
-        <View style={styles.logoContainer}>
-          <Text style={styles.appName}>Nexus Health</Text>
-          <Text style={styles.tagline}>Track your health journey</Text>
-        </View>
-        
-        <View style={styles.formContainer}>
-          <Text style={commonStyles.title}>Sign In</Text>
-          <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleLogin}>
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <View style={styles.form}>
+            <TextInput
+              placeholder="Email"
+              style={styles.input}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={handleChange("email")}
+              onBlur={handleBlur("email")}
+              value={values.email}
+              returnKeyType="next"
+            />
+            {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
+
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Password"
+                style={[styles.input, { flex: 1 }]}
+                secureTextEntry={secureTextEntry}
+                autoCapitalize="none"
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                value={values.password}
+                onSubmitEditing={() => handleSubmit()}
+              />
+              <TouchableOpacity onPress={toggleSecureEntry} style={styles.icon}>
+                <Ionicons
+                  name={secureTextEntry ? "eye-off" : "eye"}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+            {touched.password && errors.password && <Text style={styles.error}>{errors.password}</Text>}
+
+            {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+
+            {loading ? (
+              <ActivityIndicator style={{ marginTop: 16 }} size="large" color="#007AFF" />
+            ) : (
               <>
-                {errors.general && <Text style={commonStyles.errorText}>{errors.general}</Text>}
-                
-                <View style={commonStyles.inputContainer}>
-                  <Text style={commonStyles.inputLabel}>Email</Text>
-                  <View style={styles.inputWrapper}>
-                    <Icon name="mail-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
-                    <TextInput
-                      placeholder="Enter your email"
-                      placeholderTextColor={COLORS.inactive}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      style={commonStyles.input}
-                      onChangeText={handleChange("email")}
-                      onBlur={handleBlur("email")}
-                      value={values.email}
-                    />
-                  </View>
-                  {errors.email && touched.email && <Text style={commonStyles.errorText}>{errors.email}</Text>}
-                </View>
-                
-                <View style={commonStyles.inputContainer}>
-                  <Text style={commonStyles.inputLabel}>Password</Text>
-                  <View style={styles.inputWrapper}>
-                    <Icon name="lock-closed-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
-                    <TextInput
-                      placeholder="Enter your password"
-                      placeholderTextColor={COLORS.inactive}
-                      autoCapitalize="none"
-                      secureTextEntry={secureTextEntry}
-                      style={[commonStyles.input, { flex: 1 }]}
-                      onChangeText={handleChange("password")}
-                      onBlur={handleBlur("password")}
-                      value={values.password}
-                      onSubmitEditing={handleSubmit}
-                    />
-                    <TouchableOpacity onPress={toggleSecureEntry} style={styles.eyeIcon}>
-                      <Icon name={secureTextEntry ? "eye-off" : "eye"} size={20} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
-                  </View>
-                  {errors.password && touched.password && <Text style={commonStyles.errorText}>{errors.password}</Text>}
-                </View>
-                
-                {loading ? (
-                  <ActivityIndicator size="large" color={COLORS.primary} style={styles.spinner} />
-                ) : (
-                  <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
-                    <Text style={commonStyles.buttonText}>Sign In</Text>
-                  </TouchableOpacity>
-                )}
-                
-                <TouchableOpacity style={commonStyles.textButton} onPress={() => navigation.navigate("Register")}>
-                  <Text style={commonStyles.textButtonText}>Don't have an account? Create one</Text>
+                <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
+                  <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                  <Text style={styles.link}>Don’t have an account? Create one</Text>
                 </TouchableOpacity>
               </>
             )}
-          </Formik>
-        </View>
-      </KeyboardAvoidingView>
+          </View>
+        )}
+      </Formik>
     </SafeAreaView>
   );
 };
 
 export default LoginScreen;
 
-import { StyleSheet } from "react-native";
-
 const styles = StyleSheet.create({
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  appName: {
-    fontSize: 32,
-    color: COLORS.primary,
-    fontWeight: "700",
-  },
-  tagline: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginTop: 8,
-  },
-  formContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+  container: {
+    flex: 1,
     padding: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    backgroundColor: "#fff",
   },
-  inputWrapper: {
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    alignSelf: "center",
+    marginVertical: 32,
+  },
+  form: {
+    gap: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.inputBg,
-    borderRadius: 12,
   },
-  inputIcon: {
-    marginLeft: 16,
-    marginRight: 8,
+  icon: {
+    paddingHorizontal: 8,
   },
-  eyeIcon: {
-    padding: 16,
+  button: {
+    marginTop: 16,
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    borderRadius: 8,
   },
-  spinner: {
-    marginVertical: 20,
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  error: {
+    color: "red",
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 4,
+  },
+  link: {
+    marginTop: 16,
+    color: "#007AFF",
+    textAlign: "center",
+    textDecorationLine: "underline",
+    fontWeight: "500",
   },
 });

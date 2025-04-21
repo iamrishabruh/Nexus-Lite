@@ -3,10 +3,10 @@ from fastapi.testclient import TestClient
 from datetime import datetime
 import openai
 
-from .main import app
-from .models import User, HealthData
-from .database import get_db as real_get_db
-from . import ai as ai_module  # Import the ai module
+from main import app
+from models import User, HealthData
+from database import get_db as real_get_db
+import ai as ai_module  # Import the ai module
 
 # Dummy token decoder: always returns a payload with sub=1.
 def dummy_decode_access_token(token: str) -> dict:
@@ -53,6 +53,8 @@ class DummySession:
             return DummyQuery([entry])
         return DummyQuery([])
 
+def override_get_db():
+    yield DummySession()
 
 # Override the get_current_user dependency so it always returns a dummy user.
 def override_get_current_user_noauth(authorization: str = None, db=None) -> User:
@@ -66,7 +68,7 @@ def override_get_current_user_noauth(authorization: str = None, db=None) -> User
 
 # Apply dependency overrides.
 app.dependency_overrides[ai_module.get_current_user] = override_get_current_user_noauth
-
+app.dependency_overrides[real_get_db] = override_get_db
 
 # Patch dependencies using monkeypatch.
 @pytest.fixture(autouse=True)
