@@ -4,10 +4,8 @@ import {
   View,
   Text,
   TextInput,
-  ActivityIndicator,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -15,97 +13,101 @@ import { RootStackParamList } from "../navigation/AppNavigator";
 import { loginUser } from "../api/auth";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import Icon from "react-native-vector-icons/Ionicons";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email address").required("Email is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
 const LoginScreen = ({ navigation }: Props) => {
   const [loading, setLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const toggleSecureEntry = useCallback(() => {
     setSecureTextEntry((prev) => !prev);
   }, []);
 
-  const handleLogin = useCallback(
-    async (values: { email: string; password: string }, { setFieldError }: any) => {
-      setLoading(true);
-      try {
-        const data = await loginUser({ email: values.email, password: values.password });
-        if (data?.access_token) {
-          navigation.navigate("Dashboard", { token: data.access_token });
-        } else {
-          setFieldError("general", "Invalid login credentials.");
-        }
-      } catch (error: any) {
-        console.error("Login error:", error);
-        setFieldError("general", error.response?.data?.detail || "Login failed. Try again.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [navigation]
-  );
+  const handleLogin = useCallback(async (values: { email: string; password: string }) => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const data = await loginUser({ email: values.email, password: values.password });
+      const token = data.access_token;
+      navigation.replace("Dashboard", { token });
+    } catch (error: any) {
+      const message = error.response?.data?.detail || "Login failed";
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Text style={styles.title}>Login</Text>
-        <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleLogin}>
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-            <>
-              {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Email"
-                  placeholderTextColor="#888"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.input}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  value={values.email}
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Login</Text>
+
+      <Formik
+        initialValues={{ email: "", password: "" }}
+        validationSchema={LoginSchema}
+        onSubmit={handleLogin}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <View style={styles.form}>
+            <TextInput
+              placeholder="Email"
+              style={styles.input}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={handleChange("email")}
+              onBlur={handleBlur("email")}
+              value={values.email}
+              returnKeyType="next"
+            />
+            {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
+
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Password"
+                style={[styles.input, { flex: 1 }]}
+                secureTextEntry={secureTextEntry}
+                autoCapitalize="none"
+                onChangeText={handleChange("password")}
+                onBlur={handleBlur("password")}
+                value={values.password}
+                onSubmitEditing={() => handleSubmit()}
+              />
+              <TouchableOpacity onPress={toggleSecureEntry} style={styles.icon}>
+                <Ionicons
+                  name={secureTextEntry ? "eye-off" : "eye"}
+                  size={20}
+                  color="#888"
                 />
-                {errors.email && touched.email && <Text style={styles.errorText}>{errors.email}</Text>}
-              </View>
-              <View style={styles.inputContainer}>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    placeholder="Password"
-                    placeholderTextColor="#888"
-                    autoCapitalize="none"
-                    secureTextEntry={secureTextEntry}
-                    style={[styles.input, { flex: 1 }]}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    value={values.password}
-                    onSubmitEditing={handleSubmit}
-                  />
-                  <TouchableOpacity onPress={toggleSecureEntry} style={styles.eyeIcon}>
-                    <Icon name={secureTextEntry ? "eye-off" : "eye"} size={24} color="#888" />
-                  </TouchableOpacity>
-                </View>
-                {errors.password && touched.password && <Text style={styles.errorText}>{errors.password}</Text>}
-              </View>
-              {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-              ) : (
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              </TouchableOpacity>
+            </View>
+            {touched.password && errors.password && <Text style={styles.error}>{errors.password}</Text>}
+
+            {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+
+            {loading ? (
+              <ActivityIndicator style={{ marginTop: 16 }} size="large" color="#007AFF" />
+            ) : (
+              <>
+                <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
                   <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
-                <Text style={styles.registerText}>Don't have an account? Register</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </Formik>
-      </KeyboardAvoidingView>
+
+                <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                  <Text style={styles.link}>Don’t have an account? Create one</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+      </Formik>
     </SafeAreaView>
   );
 };
@@ -113,69 +115,58 @@ const LoginScreen = ({ navigation }: Props) => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
   container: {
     flex: 1,
-    padding: 16,
-    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 24,
+    alignSelf: "center",
+    marginVertical: 32,
   },
-  inputContainer: {
-    marginBottom: 12,
+  form: {
+    gap: 16,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 6,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    paddingRight: 12,
   },
-  eyeIcon: {
-    padding: 10,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  spinner: {
-    marginVertical: 16,
+  icon: {
+    paddingHorizontal: 8,
   },
   button: {
-    backgroundColor: "#007BFF",
-    padding: 14,
-    borderRadius: 6,
-    alignItems: "center",
-    marginVertical: 10,
+    marginTop: 16,
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    textAlign: "center",
     fontWeight: "bold",
+    fontSize: 16,
   },
-  registerButton: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  registerText: {
-    color: "#007BFF",
+  error: {
+    color: "red",
     fontSize: 14,
+    marginTop: -10,
+    marginBottom: 4,
+  },
+  link: {
+    marginTop: 16,
+    color: "#007AFF",
+    textAlign: "center",
+    textDecorationLine: "underline",
+    fontWeight: "500",
   },
 });
