@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
 import {
   SafeAreaView,
   View,
@@ -10,9 +9,6 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-=======
-import { SafeAreaView, View, Text, Button, ScrollView, StyleSheet } from "react-native";
->>>>>>> rescue-branch
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { getAIInsights } from "../api/ai";
@@ -47,17 +43,12 @@ const AIInsights = ({ route, navigation }: Props) => {
           <Text style={styles.insightText}>{insights}</Text>
         </ScrollView>
         <View style={styles.buttonContainer}>
-<<<<<<< HEAD
           <TouchableOpacity style={commonStyles.button} onPress={fetchInsights}>
             <Text style={commonStyles.buttonText}>Refresh Insights</Text>
           </TouchableOpacity>
           <TouchableOpacity style={commonStyles.button} onPress={() => navigation.goBack()}>
             <Text style={commonStyles.buttonText}>Back to Dashboard</Text>
           </TouchableOpacity>
-=======
-          <Button title="Refresh Insights" onPress={fetchInsights} />
-          <Button title="Back to Dashboard" onPress={() => navigation.goBack()} />
->>>>>>> rescue-branch
         </View>
       </View>
     </SafeAreaView>
